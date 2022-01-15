@@ -1,0 +1,4 @@
+playwright==1.17.2
+pytest==6.2.5
+pytest-playwright==0.2.2
+black==21.12b0

@@ -13,12 +13,13 @@ def test_hiddenlayers(page):
     page.goto("/hiddenlayers")
     page.click("text='Button'")
 
-    #     locator = page.locator("'Button'")
-    #     print(locator.count())
-    #     for handle in locator.element_handles():
-    #         if handle.is_visible():
-    #             print(handle.get_attribute("id"))
-    #             handle.click()
+    #     buttons_locator = page.locator("'Button'")
+    #     print(buttons_locator.count())
+    #     for i in range(buttons_locator.count()):
+    #         locator = buttons_locator.nth(i)
+    #         if locator.is_visible():
+    #             print(locator.get_attribute("id"))
+    #             locator.click()
 
     page.click("#blueButton")
 
@@ -61,25 +62,23 @@ def test_scrollbars(page):
 
 def test_dynamictable(page):
     page.goto("/dynamictable")
-    header_handles = page.query_selector_all('[role="table"] [role="columnheader"]')
 
-    target_header_handle = next(
-        (x for x in header_handles if x.evaluate("node => node.textContent") == "CPU"),
-        None,
+    colheaders_locator = page.locator('[role="table"] [role="columnheader"]')
+    target_prop_node_index = colheaders_locator.evaluate_all(
+        "nodes => {"
+        + "const targetPropNode = Array.from(nodes).find(node => node.textContent === 'CPU');"
+        + "return [...targetPropNode.parentElement.childNodes].indexOf(targetPropNode);"
+        + "}"
     )
-    target_index = target_header_handle.evaluate(
-        "node => [...node.parentElement.childNodes].indexOf(node)"
+
+    cells_locator = page.locator('[role="table"] [role="cell"]')
+    chrome_cpu_load = cells_locator.evaluate_all(
+        "(nodes, targetPropNodeIndex) => {"
+        + "const targetBrowserNode = Array.from(nodes).find(node => node.textContent === 'Chrome');"
+        + "return targetBrowserNode.parentElement.childNodes[targetPropNodeIndex].textContent;"
+        + "}",
+        target_prop_node_index,
     )
-
-    cell_handles = page.query_selector_all('[role="table"] [role="cell"]')
-    chrome_cpu_load = None
-
-    for handle in cell_handles:
-        if handle.evaluate("node => node.textContent") == "Chrome":
-            chrome_cpu_load = handle.evaluate(
-                f"node => node.parentElement.childNodes[{target_index}].textContent"
-            )
-            break
 
     assert chrome_cpu_load in page.text_content("p.bg-warning")
 
@@ -101,12 +100,13 @@ def test_progressbar(page):
 
 def test_visibility(page):
     page.goto("/visibility")
-    locator = page.locator("button")
+    buttons_locator = page.locator("button")
     page.click("#hideButton")
 
     visibility = False
-    for handle in locator.element_handles():
-        text = handle.text_content()
+    for i in range(buttons_locator.count()):
+        locator = buttons_locator.nth(i)
+        text = locator.text_content()
         if (
             not (
                 text == "Hide"
@@ -114,9 +114,9 @@ def test_visibility(page):
                 or text == "Opacity 0"
                 or text == "Offscreen"
             )
-            and handle.is_visible()
+            and locator.is_visible()
         ):
-            print(handle.text_content())
+            print(f'"{text}" Button is visible (!)')
             visibility = True
             break
 
