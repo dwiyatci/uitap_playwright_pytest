@@ -1,8 +1,13 @@
-.PHONY: install test test_ci
+.PHONY: install install_pw test test_ci
 
 install:
+	pip install --upgrade pip
 	pip install -r requirements.txt
+	make install_pw
+
+install_pw:
 	playwright install chromium
+	playwright install-deps chromium
 
 test:
 	python -m pytest -s --headed
