@@ -2,7 +2,7 @@
 
 🎭🐍 Automate end-to-end tests training against [www.uitestingplayground.com](http://www.uitestingplayground.com/) using [Playwright](https://playwright.dev/) and [pytest](https://docs.pytest.org/en/latest/explanation/fixtures.html), written in Python.
 
-![](test_all.webm.mov)
+https://user-images.githubusercontent.com/4405796/164913144-bfbc8f54-4bac-4e61-af09-d1c8ac860304.mov
 
 ## 🆙 and 🏃🏻
 
