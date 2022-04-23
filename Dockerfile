@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.17.2
+FROM mcr.microsoft.com/playwright/python:v1.21.0
 
 WORKDIR /e2e-testing
 COPY . .

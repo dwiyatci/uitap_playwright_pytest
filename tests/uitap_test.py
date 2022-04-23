@@ -1,63 +1,74 @@
 def test_dynamicid(page):
     page.goto("/dynamicid")
-    page.click("text=Button with Dynamic ID")
+
+    page.locator("'Button with Dynamic ID'").click()
 
 
 def test_classattr(page):
     page.goto("/classattr")
-    page.click(".btn-primary")
+
+    page.locator(".btn-primary").click()
 
 
 def test_hiddenlayers(page):
-    page.set_default_timeout(5000)
     page.goto("/hiddenlayers")
-    page.click("text='Button'")
 
-    #     buttons_locator = page.locator("'Button'")
-    #     print(buttons_locator.count())
+    page.set_default_timeout(5000)
+
+    buttons_locator = page.locator("'Button'")
+    print(buttons_locator.count())
+    buttons_locator.click()
+
+    print(buttons_locator.count())
     #     for i in range(buttons_locator.count()):
     #         locator = buttons_locator.nth(i)
     #         if locator.is_visible():
     #             print(locator.get_attribute("id"))
     #             locator.click()
 
-    page.click("#blueButton")
+    page.locator("#blueButton").click()
 
 
 def test_loaddelay(page):
     page.goto("/")
-    page.click("'Load Delay'")
-    page.click("'Button Appearing After Delay'")
+
+    page.locator("'Load Delay'").click()
+    page.locator("'Button Appearing After Delay'").click()
 
 
 def test_ajax(page):
     page.goto("/ajax")
-    page.click("'Button Triggering AJAX Request'")
-    page.click("'Data loaded with AJAX get request.'")
+
+    page.locator("'Button Triggering AJAX Request'").click()
+    page.locator("'Data loaded with AJAX get request.'").click()
 
 
 def test_clientdelay(page):
     page.goto("/clientdelay")
-    page.click("'Button Triggering Client Side Logic'")
-    page.click("'Data calculated on the client side.'")
+
+    page.locator("'Button Triggering Client Side Logic'").click()
+    page.locator("'Data calculated on the client side.'").click()
 
 
 def test_click(page):
     page.goto("/click")
-    page.click("'Button That Ignores DOM Click Event'")
-    page.click("'Button That Ignores DOM Click Event'")
+
+    page.locator("'Button That Ignores DOM Click Event'").click()
+    page.locator("'Button That Ignores DOM Click Event'").click()
 
 
 def test_testinput(page):
     page.goto("/textinput")
-    page.fill("#newButtonName", "MyButton")
-    page.click("'Button That Should Change it's Name Based on Input Value'")
-    assert page.text_content("#updatingButton") == "MyButton"
+
+    page.locator("#newButtonName").fill("MyButton")
+    page.locator("'Button That Should Change it's Name Based on Input Value'").click()
+    assert page.locator("#updatingButton").text_content() == "MyButton"
 
 
 def test_scrollbars(page):
     page.goto("/scrollbars")
-    page.click("'Hiding Button'")
+
+    page.locator("'Hiding Button'").click()
 
 
 def test_dynamictable(page):
@@ -80,28 +91,31 @@ def test_dynamictable(page):
         target_prop_node_index,
     )
 
-    assert chrome_cpu_load in page.text_content("p.bg-warning")
+    assert chrome_cpu_load in page.locator("p.bg-warning").text_content()
 
 
 def test_verifytext(page):
     page.goto("/verifytext")
-    text = page.inner_text(".bg-primary > .badge-secondary")
+
+    text = page.locator(".bg-primary > .badge-secondary").inner_text()
     assert text == "Welcome UserName!"
 
 
 def test_progressbar(page):
     page.goto("/progressbar")
-    page.click("#startButton")
+
+    page.locator("#startButton").click()
     page.wait_for_selector("#progressBar:has-text('75%')")
-    page.click("#stopButton")
-    result = page.text_content("#result")
+    page.locator("#stopButton").click()
+    result = page.locator("#result").text_content()
     assert "Result: 0" in result
 
 
 def test_visibility(page):
     page.goto("/visibility")
+
     buttons_locator = page.locator("button")
-    page.click("#hideButton")
+    page.locator("#hideButton").click()
 
     visibility = False
     for i in range(buttons_locator.count()):
@@ -126,26 +140,28 @@ def test_visibility(page):
 def test_sampleapp(page):
     page.goto("/sampleapp")
 
-    page.fill('[name="UserName"]', "glenn")
-    page.fill('[name="Password"]', "pwd")
-    page.click("#login")
-    assert page.text_content("#loginstatus") == "Welcome, glenn!"
-    page.click("#login")
-    assert page.text_content("#loginstatus") == "User logged out."
+    page.locator('[name="UserName"]').fill("glenn")
+    page.locator('[name="Password"]').fill("pwd")
+    page.locator("#login").click()
+    assert page.locator("#loginstatus").text_content() == "Welcome, glenn!"
+    page.locator("#login").click()
+    assert page.locator("#loginstatus").text_content() == "User logged out."
 
-    page.fill('[name="UserName"]', "glenn")
-    page.fill('[name="Password"]', "özge")
-    page.click("#login")
-    assert page.text_content("#loginstatus") == "Invalid username/password"
+    page.locator('[name="UserName"]').fill("glenn")
+    page.locator('[name="Password"]').fill("zsófi")
+    page.locator("#login").click()
+    assert page.locator("#loginstatus").text_content() == "Invalid username/password"
 
 
 def test_mouseover(page):
     page.goto("/mouseover")
-    page.click("'Click me'")
-    page.click("'Click me'")
-    assert int(page.text_content("#clickCount")) == 2
+
+    page.locator("'Click me'").click()
+    page.locator("'Click me'").click()
+    assert int(page.locator("#clickCount").text_content()) == 2
 
 
 def test_nbsp(page):
     page.goto("/nbsp")
-    page.click("'My Button'")
+
+    page.locator("'My Button'").click()

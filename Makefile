@@ -1,4 +1,4 @@
-.PHONY: install install_pw test test_ci
+.PHONY: install install_pw test test_ci debug_test concat_vids
 
 install:
 	pip install --upgrade pip
@@ -6,11 +6,20 @@ install:
 	make install_pw
 
 install_pw:
-	playwright install chromium
-	playwright install-deps chromium
+	python -m playwright install chromium
+	python -m playwright install-deps chromium
 
 test:
-	python -m pytest -s --headed
+	make run_pytest args="--headed $(args)"
 
 test_ci:
-	python -m pytest -s
+	make run_pytest args="$(args)"
+
+debug_test:
+	PWDEBUG=1 make run_pytest args="$(args)"
+
+concat_vids:
+	rm -f list.txt && for f in videos/*.webm; do echo file \'$$f\' >> list.txt; done && ffmpeg -f concat -i list.txt -c copy -y test_all.webm && rm list.txt
+
+run_pytest:
+	python -m pytest -s $(args)
