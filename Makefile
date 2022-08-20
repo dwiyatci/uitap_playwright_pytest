@@ -5,6 +5,12 @@ install:
 	pip install -r requirements.txt
 	make install_pw
 
+upgrade:
+	pip install --upgrade pip
+	pip install upgrade-requirements
+	upgrade-requirements
+	make install_pw
+
 install_pw:
 	python -m playwright install chromium
 	python -m playwright install-deps chromium

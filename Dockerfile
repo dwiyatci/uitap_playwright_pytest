@@ -1,9 +1,9 @@
-FROM mcr.microsoft.com/playwright/python:v1.21.0
+FROM mcr.microsoft.com/playwright/python:v1.25.1
 
 WORKDIR /e2e-testing
 COPY . .
 
-RUN make install
+RUN pip install -r requirements.txt
 
 ENTRYPOINT [ "./docker-entrypoint.sh" ]
-CMD [ "make", "test_ci" ]
+CMD [ "pytest", "-s" ]

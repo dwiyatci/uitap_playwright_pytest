@@ -16,10 +16,10 @@ def test_hiddenlayers(page):
     page.set_default_timeout(5000)
 
     buttons_locator = page.locator("'Button'")
-    print(buttons_locator.count())
+    # print(buttons_locator.count())
     buttons_locator.click()
 
-    print(buttons_locator.count())
+    # print(buttons_locator.count())
     #     for i in range(buttons_locator.count()):
     #         locator = buttons_locator.nth(i)
     #         if locator.is_visible():
