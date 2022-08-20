@@ -32,7 +32,7 @@ def pytest_runtest_makereport(item, call):
     # set a report attribute for each phase of a call, which can
     # be "setup", "call", "teardown"
 
-    setattr(item, "rep_" + rep.when, rep)
+    setattr(item, f"rep_{rep.when}", rep)
 
 
 video_counter = 0
@@ -41,6 +41,7 @@ video_counter = 0
 @pytest.fixture(autouse=True)
 def save_video_as(request, page):
     global video_counter
+    video_counter = video_counter + 1
 
     yield
 
@@ -50,7 +51,6 @@ def save_video_as(request, page):
     if video_opt == "on" or (video_opt == "retain-on-failure" and test_result_failed):
         page.context.close()
 
-        video_counter = video_counter + 1
         custom_path = f"videos/{video_counter:02d}_{request.node.originalname}.webm"
         page.video.save_as(custom_path)
         page.video.delete()
