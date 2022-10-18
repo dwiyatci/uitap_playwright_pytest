@@ -22,6 +22,9 @@ make install
 
 # Run tests
 make test
+
+# Run tests in parallel fashion (⚠️ EXPERIMENTAL!)
+make test_parallel
 ```
 
 ## 🏃🏻 inside 🐳

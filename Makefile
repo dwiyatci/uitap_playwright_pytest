@@ -15,17 +15,17 @@ install_pw:
 	python -m playwright install chromium
 	python -m playwright install-deps chromium
 
+test_parallel:
+	make test args="--workers 2 --tests-per-worker auto $(args)"
+
 test:
-	make run_pytest args="--headed $(args)"
+	make test_ci args="--headed $(args)"
 
 test_ci:
 	make run_pytest args="$(args)"
 
 debug_test:
 	PWDEBUG=1 make run_pytest args="$(args)"
-
-concat_vids:
-	rm -f list.txt && for f in videos/*.webm; do echo file \'$$f\' >> list.txt; done && ffmpeg -f concat -i list.txt -c copy -y test_all.webm && rm list.txt
 
 run_pytest:
 	python -m pytest -s $(args)
