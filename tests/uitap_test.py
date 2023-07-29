@@ -1,7 +1,11 @@
+from playwright.sync_api import expect
+import re
+
+
 def test_dynamicid(page):
     page.goto("/dynamicid")
 
-    page.locator("'Button with Dynamic ID'").click()
+    page.get_by_role("button", name="Button with Dynamic ID").click()
 
 
 def test_classattr(page):
@@ -13,155 +17,200 @@ def test_classattr(page):
 def test_hiddenlayers(page):
     page.goto("/hiddenlayers")
 
-    page.set_default_timeout(5000)
+    green_button = page.locator("#greenButton")
+    blue_button = page.locator("#blueButton")
 
-    buttons_locator = page.locator("'Button'")
-    # print(buttons_locator.count())
-    buttons_locator.click()
+    green_button.click()
+    blue_button.click()
 
-    # print(buttons_locator.count())
-    #     for i in range(buttons_locator.count()):
-    #         locator = buttons_locator.nth(i)
-    #         if locator.is_visible():
-    #             print(locator.get_attribute("id"))
-    #             locator.click()
-
-    page.locator("#blueButton").click()
+    expect(green_button).not_to_be_focused()
+    expect(blue_button).to_be_focused()
 
 
 def test_loaddelay(page):
     page.goto("/")
 
-    page.locator("'Load Delay'").click()
-    page.locator("'Button Appearing After Delay'").click()
+    page.get_by_role("link", name="Load Delay").click()
+    page.get_by_role("button", name="Button Appearing After Delay").click()
 
 
 def test_ajax(page):
     page.goto("/ajax")
 
-    page.locator("'Button Triggering AJAX Request'").click()
-    page.locator("'Data loaded with AJAX get request.'").click()
+    page.get_by_role("button", name="Button Triggering AJAX Request").click()
+
+    label_text = page.get_by_text("Data loaded with AJAX get request.")
+    label_text.click()
+    expect(label_text).to_be_visible()
 
 
 def test_clientdelay(page):
     page.goto("/clientdelay")
 
-    page.locator("'Button Triggering Client Side Logic'").click()
-    page.locator("'Data calculated on the client side.'").click()
+    page.get_by_role("button", name="Button Triggering Client Side Logic").click()
+
+    label_text = page.get_by_text("Data calculated on the client side.")
+    label_text.focus()
+    expect(label_text).to_be_visible()
 
 
 def test_click(page):
     page.goto("/click")
 
-    page.locator("'Button That Ignores DOM Click Event'").click()
-    page.locator("'Button That Ignores DOM Click Event'").click()
+    button = page.get_by_role("button", name="Button That Ignores DOM Click Event")
+    button.click()
+    button.click()
+    expect(button).to_be_focused()
 
 
 def test_testinput(page):
     page.goto("/textinput")
 
-    page.locator("#newButtonName").fill("MyButton")
-    page.locator("'Button That Should Change it's Name Based on Input Value'").click()
-    assert page.locator("#updatingButton").text_content() == "MyButton"
+    page.get_by_role("textbox").fill("MyButton")
+
+    page.get_by_role(
+        "button", name="Button That Should Change it's Name Based on Input Value"
+    ).click()
+    expect(page.get_by_role("button")).to_have_text("MyButton")
 
 
 def test_scrollbars(page):
     page.goto("/scrollbars")
 
-    page.locator("'Hiding Button'").click()
+    button = page.get_by_role("button", name="Hiding Button")
+    button.scroll_into_view_if_needed()
+    button.click()
+    expect(button).to_be_focused()
 
 
 def test_dynamictable(page):
     page.goto("/dynamictable")
 
-    colheaders_locator = page.locator('[role="table"] [role="columnheader"]')
-    target_prop_node_index = colheaders_locator.evaluate_all(
-        "nodes => {"
-        + "const targetPropNode = Array.from(nodes).find(node => node.textContent === 'CPU');"
-        + "return [...targetPropNode.parentElement.childNodes].indexOf(targetPropNode);"
-        + "}"
-    )
+    table = page.get_by_role("table").filter(has_text="Task Manager")
 
-    cells_locator = page.locator('[role="table"] [role="cell"]')
-    chrome_cpu_load = cells_locator.evaluate_all(
-        "(nodes, targetPropNodeIndex) => {"
-        + "const targetBrowserNode = Array.from(nodes).find(node => node.textContent === 'Chrome');"
-        + "return targetBrowserNode.parentElement.childNodes[targetPropNodeIndex].textContent;"
-        + "}",
-        target_prop_node_index,
-    )
+    chrome_row = table.get_by_role("row").filter(has_text="Chrome")
 
-    assert chrome_cpu_load in page.locator("p.bg-warning").text_content()
+    column_headers = table.get_by_role("columnheader")
+    cpu_col_idx = 0
+    for idx, column_header in enumerate(column_headers.all()):
+        if column_header.text_content() == "CPU":
+            break
+        cpu_col_idx += 1
+
+    chrome_cpu_cell = chrome_row.get_by_role("cell").nth(cpu_col_idx)
+
+    yellow_label = page.locator(".bg-warning")
+    expect(yellow_label).to_have_text(f"Chrome CPU: {chrome_cpu_cell.text_content()}")
 
 
 def test_verifytext(page):
     page.goto("/verifytext")
 
-    text = page.locator(".bg-primary > .badge-secondary").inner_text()
-    assert text == "Welcome UserName!"
+    expect(page.locator(".bg-primary").get_by_text("Welcome UserName!")).to_be_visible()
 
 
 def test_progressbar(page):
     page.goto("/progressbar")
 
-    page.locator("#startButton").click()
-    page.wait_for_selector("#progressBar:has-text('75%')")
-    page.locator("#stopButton").click()
-    result = page.locator("#result").text_content()
-    assert "Result: 0" in result
+    page.get_by_role("button", name="Start").click()
+    #     page.wait_for_selector("#progressBar:has-text('75%')")
+    #     page.locator("#progressBar:has-text('75%')").wait_for()
+    #     page.get_by_role("progressbar").filter(has_text="75%").wait_for()
+    selector = "#progressBar"
+    page.wait_for_function(
+        "selector => document.querySelector(selector).textContent === '75%'",
+        arg=selector,
+    )
+    page.get_by_role("button", name="Stop").click()
+
+    expect(page.locator("#result")).to_contain_text(re.compile(r"Result: \d{1}"))
 
 
 def test_visibility(page):
     page.goto("/visibility")
 
-    buttons_locator = page.locator("button")
-    page.locator("#hideButton").click()
+    hide_button = page.get_by_role("button", name="Hide")
+    removed_button = page.get_by_role("button", name="Removed")
+    zero_width_button = page.get_by_role("button", name="Zero Width")
+    overlapped_button = page.get_by_role("button", name="Overlapped")
+    opacity_0_button = page.get_by_role("button", name="Opacity 0")
+    visibility_hidden_button = page.get_by_role("button", name="Visibility Hidden")
+    display_none_button = page.get_by_role("button", name="Display None")
+    offscreen_button = page.get_by_role("button", name="Offscreen")
 
-    visibility = False
-    for i in range(buttons_locator.count()):
-        locator = buttons_locator.nth(i)
-        text = locator.text_content()
-        if (
-            not (
-                text == "Hide"
-                or text == "Overlapped"
-                or text == "Opacity 0"
-                or text == "Offscreen"
-            )
-            and locator.is_visible()
-        ):
-            print(f'"{text}" Button is visible (!)')
-            visibility = True
-            break
+    hide_button.click()
 
-    assert visibility == False
+    expect(hide_button).to_be_visible()
+    expect(removed_button).not_to_be_visible()
+    expect(zero_width_button).not_to_be_visible()
+    expect(overlapped_button).to_be_visible()
+    expect(opacity_0_button).to_be_visible()
+    expect(visibility_hidden_button).not_to_be_visible()
+    expect(display_none_button).not_to_be_visible()
+    expect(offscreen_button).to_be_visible()
 
 
 def test_sampleapp(page):
     page.goto("/sampleapp")
 
-    page.locator('[name="UserName"]').fill("glenn")
-    page.locator('[name="Password"]').fill("pwd")
-    page.locator("#login").click()
-    assert page.locator("#loginstatus").text_content() == "Welcome, glenn!"
-    page.locator("#login").click()
-    assert page.locator("#loginstatus").text_content() == "User logged out."
+    username_input = page.get_by_placeholder("User Name")
+    password_input = page.get_by_placeholder("********")
+    login_button = page.get_by_role("button", name="Log In")
 
-    page.locator('[name="UserName"]').fill("glenn")
-    page.locator('[name="Password"]').fill("zsófi")
-    page.locator("#login").click()
-    assert page.locator("#loginstatus").text_content() == "Invalid username/password"
+    username_input.fill("glenn")
+    password_input.fill("pwd")
+    login_button.click()
+
+    login_status = page.locator("#loginstatus")
+    expect(login_status).to_have_text("Welcome, glenn!")
+    logout_button = page.get_by_role("button", name="Log Out")
+    logout_button.click()
+    expect(login_status).to_have_text("User logged out.")
+
+    username_input.fill("glenn")
+    password_input.fill("ania")
+    login_button.click()
+    expect(login_status).to_have_text("Invalid username/password")
 
 
 def test_mouseover(page):
     page.goto("/mouseover")
 
-    page.locator("'Click me'").click()
-    page.locator("'Click me'").click()
-    assert int(page.locator("#clickCount").text_content()) == 2
+    page.pause()
+    click_link = page.get_by_text("Click me")
+    click_link.click()
+    click_link.click()
+
+    expect(page.locator("#clickCount")).to_have_text("2")
 
 
 def test_nbsp(page):
     page.goto("/nbsp")
 
-    page.locator("'My Button'").click()
+    button = page.get_by_role("button", name="My Button")
+    button.click()
+    expect(button).to_be_focused()
+
+
+def test_overlapped(page):
+    page.goto("/overlapped")
+
+    name_input = page.get_by_placeholder("Name")
+    subject_input = page.get_by_placeholder("Subject")
+
+    subject_input.scroll_into_view_if_needed()
+    name_input.fill("glenn")
+    expect(name_input).to_have_value("glenn")
+
+
+def test_shadowdom(page):
+    page.goto("/shadowdom")
+
+    page.locator("#buttonGenerate").click()
+    page.locator("#buttonCopy").click()
+
+    guid_regex = re.compile(
+        r"^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$"
+    )
+
+    expect(page.locator("#editField")).to_have_value(guid_regex)

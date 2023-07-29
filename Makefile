@@ -12,16 +12,19 @@ upgrade:
 	make install_pw
 
 install_pw:
-	python -m playwright install chromium
-	python -m playwright install-deps chromium
+	make playwright args="install chromium"
+	make playwright args="install-deps chromium"
 
 test:
 	make run_pytest args="--headed $(args)"
 
+test_ci_parallel:
+	make test_ci args="--numprocesses auto $(args)"
+
 test_ci:
 	make run_pytest args="$(args)"
 
-debug_test:
+debug:
 	PWDEBUG=1 make run_pytest args="$(args)"
 
 concat_vids:
@@ -29,3 +32,9 @@ concat_vids:
 
 run_pytest:
 	python -m pytest -s $(args)
+
+codegen:
+	make playwright args="codegen http://www.uitestingplayground.com/home"
+
+playwright:
+	python -m playwright $(args)

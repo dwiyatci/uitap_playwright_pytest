@@ -22,6 +22,12 @@ make install
 
 # Run tests
 make test
+
+# Run tests (headless)
+make test_ci
+
+# Run tests (headless, in parallel)
+make test_ci_parallel
 ```
 
 ## 🏃🏻 inside 🐳
