@@ -113,13 +113,13 @@ def test_progressbar(page):
     page.goto("/progressbar")
 
     page.get_by_role("button", name="Start").click()
-    #     page.wait_for_selector("#progressBar:has-text('75%')")
-    #     page.locator("#progressBar:has-text('75%')").wait_for()
+    #     page.wait_for_selector('#progressBar:has-text("75%")')
+    #     page.locator('#progressBar:has-text("75%")').wait_for()
     #     page.get_by_role("progressbar").filter(has_text="75%").wait_for()
-    selector = "#progressBar"
+    progressbar_selector = "#progressBar"
     page.wait_for_function(
         "selector => document.querySelector(selector).textContent === '75%'",
-        arg=selector,
+        arg=progressbar_selector,
     )
     page.get_by_role("button", name="Stop").click()
 
