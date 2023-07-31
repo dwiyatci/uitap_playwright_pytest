@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright/python:v1.36.0-jammy
+FROM mcr.microsoft.com/playwright/python:v1.36.0
 
 WORKDIR /e2e-testing
 COPY . .
